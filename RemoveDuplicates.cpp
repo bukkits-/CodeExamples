@@ -1,3 +1,16 @@
+/*
+Matthew Groeling
+July 3rd, 2015
+
+RemoveDuplicates.cpp
+
+Code written while experimenting with the Aether project (getaether.com)
+This code this code reads in items from a text file, and removes duplicate values.
+A set could be used instead of a vector for this function as well.
+Unique values are then written into an output text file and SQLite database.
+
+*/
+
 #include <stdlib.h>
 #include <iostream>
 #include <istream>
@@ -29,6 +42,11 @@ int main(int argc, char* argv[])
 
 //open db and txt files
   rc = sqlite3_open("aether.db", &db);
+  if(argv[1] == '')
+    {argv[1] = 'in.txt';}
+  if(argv[2] == '')
+    {argv[2] == 'out.txt';}
+
   in.open(argv[1]);
   out.open(argv[2]);
 
@@ -44,23 +62,28 @@ int main(int argc, char* argv[])
 
   if(in.is_open() && out.is_open())
   {
-    cout << "Files opened successfully\n";
+// Add items from the text file to vector
     while(getline(in, line))
     {
       IpList.push_back(line);
-      cout << "Reading: " << line << endl;
+      //cout << "Reading: " << line << endl;
     }
+    cout << IpList.size() << " items." << endl;
     if(IpList.size() > 0)
     {
-      //Sort the list of IPs then remove duplicates with unique() and erase()
+//Sort the list of IPs then remove duplicates with unique() and erase()
       sort(IpList.begin(), IpList.end());
       IpList.erase(unique(IpList.begin(), IpList.end()), IpList.end());
 
       cout << IpList.size() << " unique items." << endl;
+
+//Write vector of unique items to file
       for(int i = 0; i < IpList.size(); i++)
       {
         SplitList.erase(SplitList.begin(), SplitList.end());
-        cout << "Writing : " << IpList[i] << endl;
+        //cout << "Writing : " << IpList[i] << endl;
+
+//Adds items to a SQLite Database
         sql = "INSERT or REPLACE INTO nodes(LastConnectedIP, LastConnectedPort, LastConnectedDate, LastSyncTimestamp) VALUES(?, ?, ?, ?)";
         split(SplitList , IpList[i], is_any_of(":"), token_compress_on);
 
